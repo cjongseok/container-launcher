@@ -100,7 +100,7 @@ function tool_git_clone(){
         exit 1
     fi
 
-    tool_install_pkg_if_not_exists git
+    tool_install_pkg_if_not_exists git git
 
     git clone $url $target
 
