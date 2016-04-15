@@ -15,12 +15,13 @@ function func_usage(){
 }
 
 ZK_SRV_NAME="$1"
-ZK_SERVER="$2"
+ZK_SERVERS="$2"
 
 # Setup env 
 . ${SCRIPT_DIR}/docker_env.sh
 . ${SCRIPT_DIR}/consul_env.sh
-. ${SCRIPT_DIR}/zk_env.sh $ZK_SRV_NAME "zookeeper1 zookeeper2 zookeeper3"
+. ${SCRIPT_DIR}/zk_env.sh $ZK_SRV_NAME "$SK_SERVERS"
+#. ${SCRIPT_DIR}/zk_env.sh $ZK_SRV_NAME "zookeeper1 zookeeper2 zookeeper3"
 
 #ENV_FILES=( "${SCRIPT_DIR}/docker_env.sh" "${SCRIPT_DIR}/consul_env.sh" "${SCRIPT_DIR}/zk_env.sh zks1")
 DOCKER_COMPOSE_FILES=( "${DOCKER_COMPOSE_AWS_AGENT}" "${DOCKER_COMPOSE_ZK_SERVER}")
