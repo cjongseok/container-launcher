@@ -13,8 +13,8 @@ SCRIPT_DIR=$(dirname $(readlink -e $0))
 
 # ZooKeeper Environment ############################################################################
 #  Consul Service Name
-readonly SERVICE_NAME=$1
-readonly ZK_SERVERS=$2
+readonly SERVICE_NAME="$1"
+readonly ZK_SERVERS="$2"
 #  And something
 
 #################################################################################################
