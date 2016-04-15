@@ -20,7 +20,7 @@ ZK_SERVERS="$2"
 # Setup env 
 . ${SCRIPT_DIR}/docker_env.sh
 . ${SCRIPT_DIR}/consul_env.sh
-. ${SCRIPT_DIR}/zk_env.sh $ZK_SRV_NAME "$SK_SERVERS"
+. ${SCRIPT_DIR}/zk_env.sh $ZK_SRV_NAME "$ZK_SERVERS"
 #. ${SCRIPT_DIR}/zk_env.sh $ZK_SRV_NAME "zookeeper1 zookeeper2 zookeeper3"
 
 #ENV_FILES=( "${SCRIPT_DIR}/docker_env.sh" "${SCRIPT_DIR}/consul_env.sh" "${SCRIPT_DIR}/zk_env.sh zks1")
