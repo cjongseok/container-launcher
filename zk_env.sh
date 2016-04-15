@@ -15,6 +15,9 @@ SCRIPT_DIR=$(dirname $(readlink -e $0))
 #  Consul Service Name
 readonly SERVICE_NAME="$1"
 readonly ZK_SERVERS="$2"
+
+echo "SERVICE_NAME=$SERVICE_NAME"
+echo "ZK_SERVERS=$ZK_SERVERS"
 #  And something
 
 #################################################################################################
