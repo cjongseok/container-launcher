@@ -63,6 +63,8 @@ function func_write_option_to_docker_conf_file(){
 #        sudo sed -i 's/^ *'"$option_var_name"'.*$/'"$option_var_name"'='"$option"'/g' $docker_conf_file
 #    fi
 
+    # TODO: If options already exists, do not apply it and restart docker
+
     option="\"$option\""
     sudo sed -i '/^'"$option_var_name"'/d' $docker_conf_file
     echo "$option_var_name=$option" >> $docker_conf_file

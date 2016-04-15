@@ -146,6 +146,7 @@ function tool_up_docker_compose(){
 function tool_up_docker_composes(){
     local docker_compose_files=("$@")
     local filenum=${#docker_compose_files[@]}
+    local unset index
 
     for ((index=0; index<filenum; index++)); do
         tool_up_docker_compose ${docker_compose_file[index]}
@@ -296,18 +297,37 @@ function tool_template_fill_in(){
     local output_file=$2
     local argv=($@)
     local argn=$#
+    local unset index
     if [ $argn -lt 4 ] || [ $((argn%2)) -ne 0 ]; then
         exit 255
     fi
+
+#    echo "cmdline_in_fill_in=""${argv[13]}"
+    echo "cmdline_in_fill_in=""$4"
 
     rm $output_file
 
     local sed_expressions=""
     for ((index=2; index<argn; index=index+2)); do
         local key=${argv[index]}
-        local value=${argv[index+1]}
+        local value="${argv[index+1]}"
         sed_expressions=$sed_expressions" -e 's/<$key>/$value/g'"
     done
+
+    eval "cat $template_file | sed $sed_expressions" > $output_file
+}
+
+# $1: template file
+# $2: output file
+# $3: key
+# $4: value
+function tool_template_fill_in_with_spacing_arg(){
+    local template_file=$1
+    local output_file=$2
+    local key=$3
+    local value="$4"
+
+    local sed_expressions="'s/<$key>/$value/g'"
 
     eval "cat $template_file | sed $sed_expressions" > $output_file
 }
@@ -315,7 +335,13 @@ function tool_template_fill_in(){
 # $1: input string
 function tool_escape_characters_for_sed(){
     local input_str=$1
+    #local result= "${input_str//\//\\/}"
+    
+#    result="${result//\"/\\"}"
+    #echo $result
     echo "${input_str//\//\\/}"
+    #echo "${$(echo ${input_str//\//\\/})//\"/\\"}"
+   #echo "${${input_str//\//\\/}//a/A}"
 }
 
 # $1: ansible user
@@ -335,6 +361,7 @@ function tool_ansible_copy_and_run_script_in_sudo(){
     local SRC_FILE=$2
     local DEST_FILE=$3
     local OWNER=$4
+    local unset index
 
     ANSIBLE_USER=$(tool_escape_characters_for_sed $ANSIBLE_USER)
     SRC_FILE=$(tool_escape_characters_for_sed $SRC_FILE)
@@ -364,7 +391,7 @@ function tool_ansible_copy_and_run_script_in_sudo(){
 # $4: git repo dest
 # $5: git version
 # $6: cmd line
-# ...: host
+# $7: hosts
 function tool_ansible_git_clone_and_run_in_sudo(){
     local PLAYBOOK_DIR=$(dirname $(readlink -e $0))/playbook_templates
     local PLAYBOOK_TEMPLATE=$PLAYBOOK_DIR/git_clone_and_run_script.yml
@@ -377,20 +404,24 @@ function tool_ansible_git_clone_and_run_in_sudo(){
     local dest_repo=$4
     local repo_version=$5
     local cmd_line=$6
+    local hosts="$7"
+    local unset index
 
     ansible_user=$(tool_escape_characters_for_sed $ansible_user)
     git_repo=$(tool_escape_characters_for_sed $git_repo)
     dest_repo=$(tool_escape_characters_for_sed $dest_repo)
     repo_version=$(tool_escape_characters_for_sed $repo_version)
-    cmd_line=$(tool_escape_characters_for_sed $cmd_line)
+    cmd_line=$(tool_escape_characters_for_sed "$cmd_line")
 
-    echo "ansible_user=$ansible_user"
-    echo "git_repo=$git_repo"
-    echo "dest_repo=$dest_repo"
-    echo "repo_version=$repo_version"
-    echo "cmd_line=$cmd_line"
+#    echo "ansible_user=$ansible_user"
+#    echo "git_repo=$git_repo"
+#    echo "dest_repo=$dest_repo"
+#    echo "repo_version=$repo_version"
 
-    tool_template_fill_in $PLAYBOOK_TEMPLATE $PLAYBOOK_GEN_FILE "ANSIBLE_USER" $ansible_user "GIT_REPO" $git_repo "DEST_REPO" $dest_repo "REPO_VERSION" $repo_version "CMD_LINE" $cmd_line
+#    tool_template_fill_in $PLAYBOOK_TEMPLATE $PLAYBOOK_GEN_FILE "CMD_LINE" "$cmd_line" "ANSIBLE_USER" $ansible_user "GIT_REPO" $git_repo "DEST_REPO" $dest_repo "REPO_VERSION" $repo_version
+    #tool_template_fill_in $PLAYBOOK_TEMPLATE $PLAYBOOK_GEN_FILE "ANSIBLE_USER" $ansible_user "GIT_REPO" $git_repo "DEST_REPO" $dest_repo "REPO_VERSION" $repo_version "CMD_LINE" "$cmd_line"
+    tool_template_fill_in $PLAYBOOK_TEMPLATE $PLAYBOOK_GEN_FILE.tmp "ANSIBLE_USER" $ansible_user "GIT_REPO" $git_repo "DEST_REPO" $dest_repo "REPO_VERSION" $repo_version 
+    tool_template_fill_in_with_spacing_arg $PLAYBOOK_GEN_FILE.tmp $PLAYBOOK_GEN_FILE "CMD_LINE" "$cmd_line"
     
     local argv=($@)
     local argn=$#
@@ -398,11 +429,13 @@ function tool_ansible_git_clone_and_run_in_sudo(){
         rm -f $HOSTLIST_FILE
     fi
     touch $HOSTLIST_FILE
-    for ((index=6; index<argn; index++)); do
-        local host=${argv[index]}
+    for host in $(echo $hosts); do
+    #for ((index=6; index<argn; index++)); do
+     #   local host=${argv[index]}
         echo "$host" >> $HOSTLIST_FILE
     done
 
+    echo "ansible-playbook $PLAYBOOK_GEN_FILE -vvvv -i $HOSTLIST_FILE --private-key $PRV_KEY_FILE --sudo"
     ansible-playbook $PLAYBOOK_GEN_FILE -vvvv -i $HOSTLIST_FILE --private-key $PRV_KEY_FILE --sudo
 }
 
