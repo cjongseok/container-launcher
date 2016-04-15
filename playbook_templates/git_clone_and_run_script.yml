@@ -1,5 +1,5 @@
 - hosts: all
-  #  remote_user: ubuntu
+  remote_user: <ANSIBLE_USER>
   tasks:
       - name: clone git repo
         git: repo=<GIT_REPO> dest=<DEST_REPO> version=<REPO_VERSION> 

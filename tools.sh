@@ -28,7 +28,7 @@ TRUE="true"
 FALSE="false"
 SUCCESS=0
 
-LINUX_TYPE=$(cat /etc/os-release | grep "ID_LIKE" | sed 's/ID_LIKE=.*"\(.*\)"/\1/g')
+LINUX_TYPE=$(cat /etc/os-release | grep "ID_LIKE" | sed -e 's/ID_LIKE=\(.*\)/\1/g' -e 's/"//g')
 
 function tool_run_as_root(){
     if [ "$EUID" -ne 0 ]; then
@@ -302,7 +302,7 @@ function tool_template_fill_in(){
 }
 
 # $1: input string
-function tool_escape_slash_in_file_path(){
+function tool_escape_characters_for_sed(){
     local input_str=$1
     echo "${input_str//\//\\/}"
 }
@@ -320,9 +320,9 @@ function tool_ansible_copy_and_run_script_in_sudo(){
     local HOSTLIST_FILE=$PLAYBOOK_DIR/.ansible_hosts
     local ANSIBLE_USER=$1
     local SRC_FILE=$2
-    SRC_FILE=$(tool_escape_slash_in_file_path $SRC_FILE)
+    SRC_FILE=$(tool_escape_characters_for_sed $SRC_FILE)
     local DEST_FILE=$3
-    DEST_FILE=$(tool_escape_slash_in_file_path $DEST_FILE)
+    DEST_FILE=$(tool_escape_characters_for_sed $DEST_FILE)
     local OWNER=$4
     local PRV_KEY_FILE=$5
 
@@ -349,6 +349,7 @@ function tool_ansible_copy_and_run_script_in_sudo(){
 # $4: git repo dest
 # $5: git version
 # $6: cmd line
+# ...: host
 function tool_ansible_git_clone_and_run_in_sudo(){
     local PLAYBOOK_DIR=$(dirname $(readlink -e $0))/playbook_templates
     local PLAYBOOK_TEMPLATE=$PLAYBOOK_DIR/git_clone_and_run_script.yml
@@ -362,6 +363,12 @@ function tool_ansible_git_clone_and_run_in_sudo(){
     local repo_version=$5
     local cmd_line=$6
 
+    ansible_user=$(tool_escape_characters_for_sed $ansible_user)
+    git_repo=$(tool_escape_characters_for_sed $git_repo)
+    dest_repo=$(tool_escape_characters_for_sed $dest_repo)
+    repo_version=$(tool_escape_characters_for_sed $repo_version)
+    cmd_line=$(tool_escape_characters_for_sed $cmd_line)
+
     tool_template_fill_in $PLAYBOOK_TEMPLATE $PLAYBOOK_GEN_FILE "ANSIBLE_USER" $ansible_user "GIT_REPO" $git_repo "DEST_REPO" $dest_repo "REPO_VERSION" $repo_version "CMD_LINE" $cmd_line
     
     local argv=($@)
@@ -370,13 +377,12 @@ function tool_ansible_git_clone_and_run_in_sudo(){
         rm $HOSTLIST_FILE
     fi
     touch $HOSTLIST_FILE
-    for ((index=5; index<argn; index++)); do
+    for ((index=6; index<argn; index++)); do
         local host=${argv[index]}
         echo "$host" >> $HOSTLIST_FILE
     done
 
     ansible-playbook $PLAYBOOK_GEN_FILE -i $HOSTLIST_FILE --private-key $PRV_KEY_FILE --sudo
-
 }
 
 
