@@ -25,7 +25,7 @@ DOCKER_COMPOSE_FILES=( "${DOCKER_COMPOSE_AWS_AGENT}" "${DOCKER_COMPOSE_ZK_SERVER
 
 # Launch containers
 for ((index=0; index<${#DOCKER_COMPOSE_FILES[@]}; index++)); do
-    tool_docker_compose_up ${DOCKER_COMPOSE_FILES[index]}
+    tool_up_docker_compose ${DOCKER_COMPOSE_FILES[index]}
 done
 
 

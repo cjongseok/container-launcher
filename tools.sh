@@ -134,7 +134,7 @@ function tool_up_docker_compose(){
         exit
     fi
 
-    tool_install_pip_pkg_if_not_exists docker-compose
+    tool_install_pip_pkg_if_not_exists docker-compose docker-compose
     local DOCKER_COMPOSE=$(tool_get_binary_path docker-compose)
     echo "DOCKER_COMPOSE=$DOCKER_COMPOSE"
     cd $docker_compose_dir
