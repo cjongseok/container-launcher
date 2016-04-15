@@ -1,0 +1,8 @@
+- hosts: all
+  #  remote_user: ubuntu
+  tasks:
+      - name: clone git repo
+        git: repo=<GIT_REPO> dest=<DEST_REPO> version=<REPO_VERSION> 
+      - name: run an executable
+        shell: <CMD_LINE>
+

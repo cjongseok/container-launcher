@@ -1,5 +1,33 @@
 #!/bin/bash
+
+# Why Bash?
+#  Powerfull
+#  Many tools developed over 40 years
+#  Anything on Linux can be dealt with by MASHING UP tools
+#
+# Why it is needed?
+#  So many tools make scripting complex
+#  So many syntaxes make scripting complex
+#  Kind of facade for easy and fast scripting is needed
+#
+# CONVENTION or RULE?
+#  every arguments should be enveloped by double quotation.
+#  Every script should start with set -u
+#
+# TODO
+#  Groups functions as package deliminated by /
+#  Vim plugin supporting intellisense for the package
+#  Document and example in above of the function are essential 
+#
+# Return
+#  0: normal
+#  255
+
 set -u
+TRUE="true"
+FALSE="false"
+SUCCESS=0
+
 LINUX_TYPE=$(cat /etc/os-release | grep "ID_LIKE" | sed 's/ID_LIKE=.*"\(.*\)"/\1/g')
 
 function tool_run_as_root(){
@@ -20,10 +48,12 @@ function tool_get_binary_path(){
     fi
 }
 
-# $1 pkg name
+# $1 bin name
+# $2 pkg name
 function tool_install_pkg_if_not_exists(){
-    local pkg=$1
-    if [ -z $(tool_get_binary_path $pkg) ]; then
+    local bin=$1
+    local pkg=$2
+    if [ -z $(tool_get_binary_path $bin) ]; then
         case "$LINUX_TYPE" in
             "rhel fedora")
                 #func_run_as_root
@@ -41,10 +71,12 @@ function tool_install_pkg_if_not_exists(){
     fi
 }
 
-# $1 pip-pkg name
+# $1 bin name
+# $2 pkg name
 function tool_install_pip_pkg_if_not_exists(){
-    pkg=$1
-    if [ -z $(tool_get_binary_path $pkg) ]; then
+    bin=$1
+    pkg=$2
+    if [ -z $(tool_get_binary_path $bin) ]; then
         #func_run_as_root
         sudo pip install $pkg
     fi
@@ -92,9 +124,9 @@ function tool_update_env_var_in_docker_compose(){
 
 
 # $1: Path of docker-compose.yml
-function tool_docker_compose_up(){
+function tool_up_docker_compose(){
     local docker_compose_file=$1
-    echo "docker_compose_file=$docker_compose_file"
+#    echo "docker_compose_file=$docker_compose_file"
     local docker_compose_dir=$(dirname $docker_compose_file)
 
     if [ -z $docker_compose_file ]; then
@@ -109,3 +141,265 @@ function tool_docker_compose_up(){
     sudo $DOCKER_COMPOSE up -d
     cd -
 }
+
+# $1: Array of docker-compos.yml paths
+function tool_up_docker_composes(){
+    local docker_compose_files=("$@")
+    local filenum=${#docker_compose_files[@]}
+
+    for ((index=0; index<filenum; index++)); do
+        tool_up_docker_compose ${docker_compose_file[index]}
+    done
+
+}
+
+#TODO: implement below functions
+#function tool_set_env(){}
+#function tool_set_envs(){}
+
+
+### JSON Tools ###
+# $1: json file file
+# @return: key value list?
+#  if the syntax is NOT matched, return nothing
+function tool_get_json_obj(){
+    local jsonfile=$1
+    echo $(jq '.' $jsonfile)
+}
+
+# $1: json obj
+# $2: json field name
+function tool_get_json_obj_value(){
+    local json_obj=$1
+    local json_field="$2"
+    echo "$json_obj" | jq '.'$json_field''
+}
+
+# $1: json array obj
+# $2: array index
+# @return: json object specified by the index
+#  if the index is out of bound, return nothing.
+function tool_index_of_json_array(){
+    local json_arr=$1
+    local arr_index=$2
+    #echo "arr_index=$arr_index"
+    echo $(echo $json_arr | jq '.['$arr_index']')
+}
+
+# $1: cmd
+# $2: json key
+function tool_run_cmd_and_get_json_val(){
+    local cmd=$1
+    local json_key=$2
+    local json_val=$($cmd | jq '.'$json_key'')
+    if [ $? -eq 0 ]; then
+        echo $json_val
+    else
+        return 255
+    fi
+}
+
+
+### AWS Tools ###
+AWS_EC2_INSTANCE_STATUS_PENDING=0
+AWS_EC2_INSTANCE_STATUS_RUNNING=16
+AWS_EC2_INSTANCE_STATUS_SUTTING_DOWN=32
+AWS_EC2_INSTANCE_STATUS_TERMINATED=48
+AWS_EC2_INSTANCE_STATUS_STOPPING=64
+AWS_EC2_INSTANCE_STATUS_STOPPED=80
+AWS_EC2_INSTANCE_STATUS_NO_INSTANCE=255
+
+# @return: $TRUE or $FALSE
+function tool_aws_cli_is_configured(){
+    # install aws-cli
+    tool_install_pip_pkg_if_not_exists "aws" "awscli"
+
+    # check access_key, secret_key, and and region configured
+    local tail_size=$(( $(aws configure list | wc -l)-2 ))
+    local aws_conf_list="$(aws configure list | tail -n $tail_size)"
+    #local aws_conf_list="$(aws configure list | tail -n $(( $(aws configure list | wc -l) - 2)) )"
+    local access_key_type=$(echo "$aws_conf_list" | grep -i access_key | awk '{print $2}')
+    local secret_key_type=$(echo "$aws_conf_list" | grep -i secret_key | awk '{print $2}')
+    local region_type=$(echo "$aws_conf_list" | grep -i region | awk '{print $2}')
+
+    if [[ "<not" == "$access_key_type" ]] || [[ "<not" == "$secret_key_type" ]] || [[ "<not" == "$region_type" ]]; then
+        echo $FALSE
+    else
+        echo $TRUE
+    fi
+}
+
+# $1: instance_id 
+# @return: "RUNNING" "STOPPED" "TERMINATED" ""
+function tool_aws_ec2_get_instance_state_code(){
+    local instance_id=$1
+    local aws_cmd="aws ec2 describe-instance-status --instance-ids $instance_id"
+    local json_key="InstanceStatuses[0].InstanceState.Code"
+    tool_run_cmd_and_get_json_val "$aws_cmd" "$json_key"
+}
+
+# $1: instance_id
+function tool_aws_ec2_start_instance(){
+    local instance_id=$1
+    local aws_cmd="aws ec2 start-instances --instance-ids $instance_id"
+    local json_key="InstanceStatuses[0].InstanceState.Code"
+    local instance_state=$(tool_run_cmd_and_get_json_val "$aws_cmd" "$json_key")
+
+    if [ $? -eq $SUCCESS ]; then
+        echo $instance_state
+    else
+        return 255
+    fi
+}
+
+#function tool_aws_ec2_launch_instance(){
+
+    # launch an instance
+    # register the caller as authorized host to the new instance
+    # register the new instance as known host to the caller
+#}
+
+### Ansible Tools ###
+# $1: name
+# $2: play
+#function tool_andible_generate_task(){}
+
+# $1: hosts
+# $2: remote_user
+# $3: tasks
+#function tool_ansible_generate_playbook(){}
+
+# $1: playbook file
+# $2: host file
+# $3: private-key
+# $4: other options
+#function tool_ansible_run_playbook(){}
+
+# $1: template file
+# $2: output file
+# $2: key
+# $3: value
+# $4: key
+# $5: value
+# ...
+function tool_template_fill_in(){
+    local template_file=$1
+    local output_file=$2
+    local argv=($@)
+    local argn=$#
+    if [ $argn -lt 4 ] || [ $((argn%2)) -ne 0 ]; then
+        exit 255
+    fi
+
+    local sed_expressions=""
+    for ((index=2; index<argn; index=index+2)); do
+        local key=${argv[index]}
+        local value=${argv[index+1]}
+        sed_expressions=$sed_expressions" -e 's/<$key>/$value/g'"
+    done
+
+    eval "cat $template_file | sed $sed_expressions" > $output_file
+}
+
+# $1: input string
+function tool_escape_slash_in_file_path(){
+    local input_str=$1
+    echo "${input_str//\//\\/}"
+}
+
+# $1: ansible user
+# $2: src file
+# $3: dest file
+# $4: owner
+# $5: private key file
+# ...: hosts
+function tool_ansible_copy_and_run_script_in_sudo(){
+    local PLAYBOOK_DIR=$(dirname $(readlink -e $0))/playbook_templates
+    local PLAYBOOK_TEMPLATE=$PLAYBOOK_DIR/copy_and_run_script.yml
+    local PLAYBOOK_GEN_FILE=$PLAYBOOK_DIR/.playbook.yml
+    local HOSTLIST_FILE=$PLAYBOOK_DIR/.ansible_hosts
+    local ANSIBLE_USER=$1
+    local SRC_FILE=$2
+    SRC_FILE=$(tool_escape_slash_in_file_path $SRC_FILE)
+    local DEST_FILE=$3
+    DEST_FILE=$(tool_escape_slash_in_file_path $DEST_FILE)
+    local OWNER=$4
+    local PRV_KEY_FILE=$5
+
+    tool_template_fill_in $PLAYBOOK_TEMPLATE $PLAYBOOK_GEN_FILE "ANSIBLE_USER" $ANSIBLE_USER "SRC_FILE" $SRC_FILE "DEST_FILE" $DEST_FILE "OWNER" $OWNER
+    #cat $PLAYBOOK_GEN_FILE
+
+    local argv=($@)
+    local argn=$#
+    if [ -f $HOSTLIST_FILE ]; then
+        rm $HOSTLIST_FILE
+    fi
+    touch $HOSTLIST_FILE
+    for ((index=5; index<argn; index++)); do
+        local host=${argv[index]}
+        echo "$host" >> $HOSTLIST_FILE
+    done
+
+    ansible-playbook $PLAYBOOK_GEN_FILE -i $HOSTLIST_FILE --private-key $PRV_KEY_FILE --sudo
+}
+
+# $1: ansible user
+# $2: private key
+# $3: git repository
+# $4: git repo dest
+# $5: git version
+# $6: cmd line
+function tool_ansible_git_clone_and_run_in_sudo(){
+    local PLAYBOOK_DIR=$(dirname $(readlink -e $0))/playbook_templates
+    local PLAYBOOK_TEMPLATE=$PLAYBOOK_DIR/git_clone_and_run_script.yml
+    local PLAYBOOK_GEN_FILE=$PLAYBOOK_DIR/.playbook.yml
+    local HOSTLIST_FILE=$PLAYBOOK_DIR/.ansible_hosts
+    local PRV_KEY_FILE=$2
+
+    local ansible_user=$1
+    local git_repo=$3
+    local dest_repo=$4
+    local repo_version=$5
+    local cmd_line=$6
+
+    tool_template_fill_in $PLAYBOOK_TEMPLATE $PLAYBOOK_GEN_FILE "ANSIBLE_USER" $ansible_user "GIT_REPO" $git_repo "DEST_REPO" $dest_repo "REPO_VERSION" $repo_version "CMD_LINE" $cmd_line
+    
+    local argv=($@)
+    local argn=$#
+    if [ -f $HOSTLIST_FILE ]; then
+        rm $HOSTLIST_FILE
+    fi
+    touch $HOSTLIST_FILE
+    for ((index=5; index<argn; index++)); do
+        local host=${argv[index]}
+        echo "$host" >> $HOSTLIST_FILE
+    done
+
+    ansible-playbook $PLAYBOOK_GEN_FILE -i $HOSTLIST_FILE --private-key $PRV_KEY_FILE --sudo
+
+}
+
+
+### SSH Tools ###
+# $1: <user_name>@<host>
+# $2: commands
+#function tool_ssh_cmd(){
+    
+#}
+
+# $1: <user_name>@<host>
+# $2: commands
+# $3: sudo passwd (, if needed)
+#function tool_ssh_sudo_cmd(){}
+
+#function tool_ssh_deliver_file(){}
+
+
+
+
+
+
+
+
+
+

@@ -96,7 +96,7 @@ function func_install_docker_if_not_exists(){
         local os_id=$(cat /etc/os-release | grep -E "^ID=" | sed 's/.*"\(.*\)"/\1/g')
         case "$os_id" in
             "amzn")
-                tool_install_pkg_if_not_exists docker
+                tool_install_pkg_if_not_exists docker docker
                 ;;
             *)
                 echo "There is no Docker."
