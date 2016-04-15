@@ -70,7 +70,11 @@ function func_write_option_to_docker_conf_file(){
 
 # Set Docker option
 function func_apply_docker_option(){
-    local unset option
+
+    # Run docker daemon to get bridge ip
+    sudo service docker start
+
+    local option=""
     if [ ! -z $DOCKER_CONTAINER_1ST_DNS ]; then
         option="--dns $DOCKER_CONTAINER_1ST_DNS "
     fi

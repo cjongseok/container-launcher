@@ -28,7 +28,7 @@ TRUE="true"
 FALSE="false"
 SUCCESS=0
 
-LINUX_TYPE=$(cat /etc/os-release | grep "ID_LIKE" | sed -e 's/ID_LIKE=\(.*\)/\1/g' -e 's/"//g')
+LINUX_TYPE="$(cat /etc/os-release | grep "ID_LIKE" | sed -e 's/ID_LIKE=\(.*\)/\1/g' -e 's/"//g')"
 
 function tool_run_as_root(){
     if [ "$EUID" -ne 0 ]; then
@@ -162,14 +162,14 @@ function tool_up_docker_composes(){
 # $1: json file file
 # @return: key value list?
 #  if the syntax is NOT matched, return nothing
-function tool_get_json_obj(){
+function tool_json_get_obj(){
     local jsonfile=$1
     echo $(jq '.' $jsonfile)
 }
 
 # $1: json obj
 # $2: json field name
-function tool_get_json_obj_value(){
+function tool_json_get_obj_value(){
     local json_obj=$1
     local json_field="$2"
     echo "$json_obj" | jq '.'$json_field''
@@ -179,16 +179,25 @@ function tool_get_json_obj_value(){
 # $2: array index
 # @return: json object specified by the index
 #  if the index is out of bound, return nothing.
-function tool_index_of_json_array(){
+function tool_json_array_index_of(){
     local json_arr=$1
     local arr_index=$2
     #echo "arr_index=$arr_index"
     echo $(echo $json_arr | jq '.['$arr_index']')
 }
 
+# $1: json array obj
+function tool_json_array_length(){
+    local json_arr=$1
+#    echo "json_arr=$json_arr"
+    #echo $(echo "$json_arr" | jq '. | length')
+    echo "$json_arr" | jq '.|length'
+}
+
+
 # $1: cmd
 # $2: json key
-function tool_run_cmd_and_get_json_val(){
+function tool_json_run_cmd_and_get_val(){
     local cmd=$1
     local json_key=$2
     local json_val=$($cmd | jq '.'$json_key'')
@@ -291,6 +300,8 @@ function tool_template_fill_in(){
         exit 255
     fi
 
+    rm $output_file
+
     local sed_expressions=""
     for ((index=2; index<argn; index=index+2)); do
         local key=${argv[index]}
@@ -318,13 +329,17 @@ function tool_ansible_copy_and_run_script_in_sudo(){
     local PLAYBOOK_TEMPLATE=$PLAYBOOK_DIR/copy_and_run_script.yml
     local PLAYBOOK_GEN_FILE=$PLAYBOOK_DIR/.playbook.yml
     local HOSTLIST_FILE=$PLAYBOOK_DIR/.ansible_hosts
+    local PRV_KEY_FILE=$5
+
     local ANSIBLE_USER=$1
     local SRC_FILE=$2
-    SRC_FILE=$(tool_escape_characters_for_sed $SRC_FILE)
     local DEST_FILE=$3
-    DEST_FILE=$(tool_escape_characters_for_sed $DEST_FILE)
     local OWNER=$4
-    local PRV_KEY_FILE=$5
+
+    ANSIBLE_USER=$(tool_escape_characters_for_sed $ANSIBLE_USER)
+    SRC_FILE=$(tool_escape_characters_for_sed $SRC_FILE)
+    DEST_FILE=$(tool_escape_characters_for_sed $DEST_FILE)
+    OWNER=$(tool_escape_characters_for_sed $OWNER)
 
     tool_template_fill_in $PLAYBOOK_TEMPLATE $PLAYBOOK_GEN_FILE "ANSIBLE_USER" $ANSIBLE_USER "SRC_FILE" $SRC_FILE "DEST_FILE" $DEST_FILE "OWNER" $OWNER
     #cat $PLAYBOOK_GEN_FILE
@@ -369,12 +384,18 @@ function tool_ansible_git_clone_and_run_in_sudo(){
     repo_version=$(tool_escape_characters_for_sed $repo_version)
     cmd_line=$(tool_escape_characters_for_sed $cmd_line)
 
+    echo "ansible_user=$ansible_user"
+    echo "git_repo=$git_repo"
+    echo "dest_repo=$dest_repo"
+    echo "repo_version=$repo_version"
+    echo "cmd_line=$cmd_line"
+
     tool_template_fill_in $PLAYBOOK_TEMPLATE $PLAYBOOK_GEN_FILE "ANSIBLE_USER" $ansible_user "GIT_REPO" $git_repo "DEST_REPO" $dest_repo "REPO_VERSION" $repo_version "CMD_LINE" $cmd_line
     
     local argv=($@)
     local argn=$#
     if [ -f $HOSTLIST_FILE ]; then
-        rm $HOSTLIST_FILE
+        rm -f $HOSTLIST_FILE
     fi
     touch $HOSTLIST_FILE
     for ((index=6; index<argn; index++)); do
@@ -382,7 +403,7 @@ function tool_ansible_git_clone_and_run_in_sudo(){
         echo "$host" >> $HOSTLIST_FILE
     done
 
-    ansible-playbook $PLAYBOOK_GEN_FILE -i $HOSTLIST_FILE --private-key $PRV_KEY_FILE --sudo
+    ansible-playbook $PLAYBOOK_GEN_FILE -vvvv -i $HOSTLIST_FILE --private-key $PRV_KEY_FILE --sudo
 }
 
 
