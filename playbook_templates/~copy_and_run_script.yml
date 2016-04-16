@@ -1,8 +1,0 @@
-- hosts: all
-  remote_user: ubuntu
-  tasks:
-      - name: deliver script
-        copy: src=<SRC_FILE> dest=<DEST_FILE> owner=<OWNER> group=<OWNER> mode=0111
-      - name: run script
-        shell: <DEST_FILE>
-

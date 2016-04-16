@@ -1,8 +1,8 @@
 #!/bin/bash
 set -u
 
-SCRIPT_DIR=$(dirname $(readlink -e $0))
-. ${SCRIPT_DIR}/tools.sh
+readonly CONSUL_ENV_SCRIPT_DIR=$(dirname $(readlink -e $0))
+. ${CONSUL_ENV_SCRIPT_DIR}/tools.sh
 
 # Consul Environment ############################################################################
 #  Env variables to configure in docker-compose
@@ -32,10 +32,13 @@ function func_configure_docker_compose(){
     for ((; index<size; index++)); do
         compose_file=${compose_files[index]}
 
-        # Configure AUTO_CONFIGURED_ENV_DOCKER_HOST_DNS_SERVER
-        tool_update_env_var_in_docker_compose "AUTO_CONFIGURED_ENV_DOCKER_HOST_DNS_SERVER" $DOCKER_HOST_DNS_SERVER $compose_file 
+        # Configure DOCKER_HOST_DNS_SERVER
+        tool_update_env_var_in_docker_compose "DOCKER_HOST_DNS_SERVER" $DOCKER_HOST_DNS_SERVER $compose_file 
 
         # Configure something here
+
+        # Resolve <ADVERTISE_IP>
+        tool_template_fill_in_in_place $compose_file "ADVERTISE_IP" $DOCKER_HOST_IP
 
     done
 }

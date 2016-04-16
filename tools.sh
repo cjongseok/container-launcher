@@ -48,6 +48,7 @@ function tool_get_binary_path(){
     fi
 }
 
+### PKG Tools ###
 # $1 bin name
 # $2 pkg name
 function tool_install_pkg_if_not_exists(){
@@ -82,9 +83,12 @@ function tool_install_pip_pkg_if_not_exists(){
     fi
 }
 
+### GIT Tools ###
 # $1: git repository url
 # $2: target directory to clone the repository
 # $3: (Optional) brnach to checkout
+# @description: It does NOT make sure the version is up-to-date, if the git repo
+#  already exists.
 function tool_git_clone(){
     local url=$1
     local target=$2
@@ -111,6 +115,7 @@ function tool_git_clone(){
     fi
 }
 
+### DOCKER Tools ###
 # $1: env variable name
 # $2: env variable value
 # $3: docker-compose file path
@@ -286,6 +291,33 @@ function tool_aws_ec2_start_instance(){
 #function tool_ansible_run_playbook(){}
 
 # $1: template file
+# $2: key
+# $3: value
+# $4: key
+# $5: value
+# ...
+function tool_template_fill_in_in_place(){
+    local template_file=$1
+    local argv=($@)
+    local argn=$#
+    local unset index
+    if [ $argn -lt 3 ] || [ $((argn%2)) -ne 1 ]; then
+        exit 255
+    fi
+
+    local sed_expressions=""
+    for ((index=1; index<argn; index=index+2)); do
+        local key=${argv[index]}
+        local value="${argv[index+1]}"
+        sed_expressions=$sed_expressions" -e 's/<$key>/$value/g'"
+    done
+
+    #eval "cat $template_file | sed $sed_expressions" > $output_file
+    eval "sed -i $sed_expressions $template_file"
+}
+
+
+# $1: template file
 # $2: output file
 # $2: key
 # $3: value
@@ -301,9 +333,6 @@ function tool_template_fill_in(){
     if [ $argn -lt 4 ] || [ $((argn%2)) -ne 0 ]; then
         exit 255
     fi
-
-#    echo "cmdline_in_fill_in=""${argv[13]}"
-    echo "cmdline_in_fill_in=""$4"
 
     rm $output_file
 

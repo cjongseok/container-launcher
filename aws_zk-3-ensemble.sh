@@ -14,10 +14,12 @@ EC2_USER_NAME=ec2-user
 EC2_PRV_KEY=jongseokChoi.pem
 ZK_LAUNCHER=launch_zk_consul-ag.sh
 
+### Bring Your Own Launcher HERE ##################################################
 LAUNCHER_GIT_REPO=https://github.com/cjongseok/container-launcher.git
 LAUNCHER_GIT_DEST=/opt/launcher
 LAUNCHER_GIT_VERSION=master
 
+##################################################################################
 
 
 
@@ -67,7 +69,10 @@ function func_launch(){
         local cmd_args="$LAUNCHER_GIT_DEST/$ZK_LAUNCHER $zk_srv_name $zk_servers"
         #local cmd_args="$LAUNCHER_GIT_DEST/$ZK_LAUNCHER"
 
-        $SCRIPT_DIR/aws_env.sh $ec2_dns
+        # Setup ec2 env
+        $SCRIPT_DIR/ec2_env.sh $ec2_dns
+
+        # Launch the zk_launcher on the instance
         tool_ansible_git_clone_and_run_in_sudo $EC2_USER_NAME $EC2_PRV_KEY $LAUNCHER_GIT_REPO $LAUNCHER_GIT_DEST $LAUNCHER_GIT_VERSION "$cmd_args" $ec2_dns
 
         #echo "$ec2_dns  $zk_srv_name $zk_servers"

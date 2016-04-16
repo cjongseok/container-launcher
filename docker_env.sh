@@ -10,6 +10,7 @@ readonly DOCKER_BRIDGE_IP=$(ip addr show docker0 | awk '/inet / {print $2}' | cu
 readonly DOCKER_HOST_DNS_SERVER=$(cat /etc/resolv.conf  | grep nameserver | head -1 | awk '{print $2}')
 
 # Docker Daemon Environment #########################################################################
+readonly DOCKER_HOST_IP=$(ip addr show $HOST_NIC  | awk '/inet / {print $2}' | cut -d/ -f1)
 readonly DOCKER_CONTAINER_1ST_DNS=$DOCKER_BRIDGE_IP
 readonly DOCKER_CONTAINER_2ND_DNS=$DOCKER_HOST_DNS_SERVER
 readonly DOCKER_CONTAINER_SEARCH_DOMAIN="service.consul"
