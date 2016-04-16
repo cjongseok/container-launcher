@@ -3,7 +3,7 @@ set -u
 
 # $1: ZooKeeper server service name
 
-if [ -z $1 ] || [ -z $2 ]; then
+if [ -z $1 ] || [ -z "$2" ]; then
     echo "zk_env.sh <SERVICE_NAME> <SERVERS>"
     exit
 fi
@@ -38,7 +38,7 @@ function func_configure_docker_compose(){
     tool_update_env_var_in_docker_compose "SERVICE_NAME" $SERVICE_NAME $DOCKER_COMPOSE_ZK_SERVER
 
     # Configure ZK_SERVERS
-    tool_update_env_var_in_docker_compose "ZK_SERVERS" $ZK_SERVERS $DOCKER_COMPOSE_ZK_SERVER
+    tool_update_env_var_in_docker_compose "ZK_SERVERS" "$ZK_SERVERS" $DOCKER_COMPOSE_ZK_SERVER
 
     # Configure something here
 }
