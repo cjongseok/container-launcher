@@ -37,7 +37,10 @@ function func_configure_docker_compose(){
 
         # Configure something here
 
-        # Resolve <ADVERTISE_IP>
+        # Resolve <NODE_NAME>. DOCKER_HOST_NAME is defined by docker_env.sh
+        tool_template_fill_in_in_place $compose_file "NODE_NAME" $DOCKER_HOST_NAME
+
+        # Resolve <ADVERTISE_IP>. DOCKER_HOST_IP is defined by docker_env.sh
         tool_template_fill_in_in_place $compose_file "ADVERTISE_IP" $DOCKER_HOST_IP
 
     done
