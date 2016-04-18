@@ -294,6 +294,18 @@ function tool_aws_ec2_start_instance(){
 # $4: other options
 #function tool_ansible_run_playbook(){}
 
+# $1: input string
+function tool_escape_characters_for_sed(){
+    local input_str=$1
+    #local result= "${input_str//\//\\/}"
+    
+#    result="${result//\"/\\"}"
+    #echo $result
+    echo "${input_str//\//\\/}"
+    #echo "${$(echo ${input_str//\//\\/})//\"/\\"}"
+   #echo "${${input_str//\//\\/}//a/A}"
+}
+
 # $1: template file
 # $2: key
 # $3: value
@@ -313,6 +325,8 @@ function tool_template_fill_in_in_place(){
     for ((index=1; index<argn; index=index+2)); do
         local key=${argv[index]}
         local value="${argv[index+1]}"
+        key=$(tool_escape_characters_for_sed $key)
+        value=$(tool_escape_characters_for_sed $value)
         sed_expressions=$sed_expressions" -e 's/<$key>/$value/g'"
     done
 
@@ -363,18 +377,6 @@ function tool_template_fill_in_with_spacing_arg(){
     local sed_expressions="'s/<$key>/$value/g'"
 
     eval "cat $template_file | sed $sed_expressions" > $output_file
-}
-
-# $1: input string
-function tool_escape_characters_for_sed(){
-    local input_str=$1
-    #local result= "${input_str//\//\\/}"
-    
-#    result="${result//\"/\\"}"
-    #echo $result
-    echo "${input_str//\//\\/}"
-    #echo "${$(echo ${input_str//\//\\/})//\"/\\"}"
-   #echo "${${input_str//\//\\/}//a/A}"
 }
 
 # $1: ansible user
