@@ -66,7 +66,8 @@ function func_launch(){
         local zk_args=$(tool_json_get_obj_value "$json_obj" "args.zookeeper")
         local zk_srv_name=$(tool_json_get_obj_value "$zk_args" "ZK_SERVICE_NAME")
         local zk_servers=$(tool_json_get_obj_value "$zk_args" "ZK_SERVERS")
-        local cmd_args="$LAUNCHER_GIT_DEST/$ZK_LAUNCHER $zk_srv_name $zk_servers"
+        local zk_myid=$(tool_json_get_obj_value "$zk_args" "ZK_MYID")
+        local cmd_args="$LAUNCHER_GIT_DEST/$ZK_LAUNCHER $zk_srv_name $zk_servers $zk_myid"
         #local cmd_args="$LAUNCHER_GIT_DEST/$ZK_LAUNCHER"
 
         # Setup ec2 env
@@ -78,5 +79,7 @@ function func_launch(){
         #echo "$ec2_dns  $zk_srv_name $zk_servers"
     done
 }
+
+# validate json file 
 
 func_launch

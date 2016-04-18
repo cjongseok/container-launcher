@@ -23,7 +23,7 @@ function func_run_script_from_remote(){
 }
 
 # Set EC2' Host Name
-sudo hostname $(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+#sudo hostname $(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 
 # install git
 echo "ec2=$AWS_INSTANCE"

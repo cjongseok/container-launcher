@@ -1,28 +1,31 @@
 [
     {
-        "ec2_dns":"ec2-52-196-157-185.ap-northeast-1.compute.amazonaws.com",
+        "ec2_dns":"172.31.29.117",
         "args":{
             "zookeeper":{
                 "ZK_SERVICE_NAME":"zookeeper1",
-                "ZK_SERVERS":"zookeeper1 zookeeper2 zookeeper3"
+                "ZK_MYID":"1",
+                "ZK_SERVERS":"172.31.29.117 172.31.20.67 172.31.22.68"
             }
         }
     },
     {
-        "ec2_dns":"ec2-52-193-68-163.ap-northeast-1.compute.amazonaws.com",
+        "ec2_dns":"172.31.20.67",
         "args":{
             "zookeeper":{
                 "ZK_SERVICE_NAME":"zookeeper2",
-                "ZK_SERVERS":"zookeeper1 zookeeper2 zookeeper3"
+                "ZK_MYID":"2",
+                "ZK_SERVERS":"172.31.29.117 172.31.20.67 172.31.22.68"
             }
         }
     },
     {
-        "ec2_dns":"ec2-52-193-186-25.ap-northeast-1.compute.amazonaws.com",
+        "ec2_dns":"172.31.22.68",
         "args":{
             "zookeeper":{
                 "ZK_SERVICE_NAME":"zookeeper3",
-                "ZK_SERVERS":"zookeeper1 zookeeper2 zookeeper3"
+                "ZK_MYID":"3",
+                "ZK_SERVERS":"172.31.29.117 172.31.20.67 172.31.22.68"
             }
         }
     }

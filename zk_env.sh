@@ -4,7 +4,7 @@ set -u
 # $1: ZooKeeper server service name
 
 if [ -z $1 ] || [ -z "$2" ]; then
-    echo "zk_env.sh <SERVICE_NAME> <SERVERS>"
+    echo "zk_env.sh <SERVICE_NAME> <SERVERS> [MYID]"
     exit
 fi
 
@@ -15,9 +15,11 @@ SCRIPT_DIR=$(dirname $(readlink -e $0))
 #  Consul Service Name
 readonly SERVICE_NAME="$1"
 readonly ZK_SERVERS="$2"
+readonly ZK_MYID="$3"
 
 echo "SERVICE_NAME=$SERVICE_NAME"
 echo "ZK_SERVERS=$ZK_SERVERS"
+echo "ZK_MYID=$ZK_MYID"
 #  And something
 
 #################################################################################################
@@ -39,6 +41,9 @@ function func_configure_docker_compose(){
 
     # Configure ZK_SERVERS
     tool_update_env_var_in_docker_compose "ZK_SERVERS" "$ZK_SERVERS" $DOCKER_COMPOSE_ZK_SERVER
+
+    # Configure ZK_MYID
+    tool_update_env_var_in_docker_compose "ZK_MYID" "$ZK_MYID" $DOCKER_COMPOSE_ZK_SERVER
 
     # Configure something here
 }

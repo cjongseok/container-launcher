@@ -175,10 +175,14 @@ function tool_json_get_obj(){
 
 # $1: json obj
 # $2: json field name
+# @return: if the value is null, return nothing
 function tool_json_get_obj_value(){
     local json_obj=$1
     local json_field="$2"
-    echo "$json_obj" | jq '.'$json_field''
+    local val=$(echo "$json_obj" | jq '.'$json_field'')
+    if ! [[ $val == "null" ]]; then
+        echo "$val"
+    fi
 }
 
 # $1: json array obj
