@@ -8,9 +8,6 @@ SCRIPT_DIR=$(dirname $(readlink -e $0))
 
 function func_usage(){
     echo "$SCRIPT_NAME <ZK_SERVICE_NAME> <ZK_SERVERS> [ZK_MYID]"    
-#    echo "$SCRIPT_NAME -a <ZK_SERVICE_NAME> <ZK_SERVERS>"    
-#    echo "$SCRIPT_NAME -j <ARG_JSON_FILE>"
-#    echo "$SCRIPT_NAME <JSON_SRING>"
     exit
 }
 
