@@ -17,12 +17,12 @@ readonly CONSUL_DOCKER_GIT_URL=https://github.com/cjongseok/consul.git
 readonly CONSUL_DOCKER_GIT_BRANCH=master
 
 readonly CONSUL_DOCKER_HOME=/opt/consul
-readonly DOCKER_COMPOSE_AWS_AGENT=$CONSUL_DOCKER_HOME/consul-agent-on-aws/docker-compose.yml
+readonly DOCKER_COMPOSE_CONSUL_AGENT=$CONSUL_DOCKER_HOME/consul-agent-on-aws/docker-compose.yml
 readonly DOCKER_COMPOSE_AWS_SERVER_BOOTSTRAPPER=$CONSUL_DOCKER_HOME/consul-server-bootstrap-on-aws/docker-compose.yml
 #DOCKER_COMPOSE_SERVER_BOOTSTRAPPER=$CONSUL_HOME/consul-server-bootstrap/docker-compose.yml
 
-#compose_files=( "$DOCKER_COMPOSE_AWS_AGENT" "$DOCKER_COMPOSE_AWS_SERVER_BOOTSTRAPPER" "$DOCKER_COMPOSE_SERVER_BOOTSTRAPPER" )
-readonly compose_files=( "$DOCKER_COMPOSE_AWS_AGENT" "$DOCKER_COMPOSE_AWS_SERVER_BOOTSTRAPPER" )
+#compose_files=( "$DOCKER_COMPOSE_CONSUL_AGENT" "$DOCKER_COMPOSE_AWS_SERVER_BOOTSTRAPPER" "$DOCKER_COMPOSE_SERVER_BOOTSTRAPPER" )
+readonly compose_files=( "$DOCKER_COMPOSE_CONSUL_AGENT" "$DOCKER_COMPOSE_AWS_SERVER_BOOTSTRAPPER" )
 
 
 function func_configure_docker_compose(){
@@ -30,7 +30,7 @@ function func_configure_docker_compose(){
     local index=0
     local size=${#compose_files[@]}
     for ((; index<size; index++)); do
-        compose_file=${compose_files[index]}
+        local compose_file=${compose_files[index]}
 
         # Configure DOCKER_HOST_DNS_SERVER
         tool_update_env_var_in_docker_compose "DOCKER_HOST_DNS_SERVER" $DOCKER_HOST_DNS_SERVER $compose_file 

@@ -32,7 +32,7 @@ echo "ZK_MYID=$ZK_MYID"
 
 
 
-#compose_files=( "$DOCKER_COMPOSE_AWS_AGENT" "$DOCKER_COMPOSE_AWS_SERVER_BOOTSTRAPPER" )
+#compose_files=( "$DOCKER_COMPOSE_CONSUL_AGENT" "$DOCKER_COMPOSE_AWS_SERVER_BOOTSTRAPPER" )
 
 
 function func_configure_docker_compose(){
