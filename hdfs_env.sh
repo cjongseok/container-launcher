@@ -23,7 +23,8 @@ readonly DOCKER_COMPOSE_HDFS_DATANODE=$HADOOP_DOCKER_HOME/hdfs-datanode/docker-c
 readonly HDFS_SERVICE_NAME="$1"
 readonly HDFS_NAMENODE="$2"
 readonly HDFS_SECONDARY_NAMENODE="$3"
-readonly HDFS_HOSTNAME=$(hostname)
+#readonly HDFS_HOSTNAME=$(hostname)
+readonly HDFS_HOSTNAME="$HDFS_SERVICE_NAME"
 readonly HDFS_DATA_VOLUME_HOST="/opt/hadoop/data"
 
 #  And something
