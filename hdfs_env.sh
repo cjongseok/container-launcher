@@ -54,8 +54,10 @@ function func_configure_docker_compose(){
 
         if [[ "$compose_file" == "$DOCKER_COMPOSE_HDFS_DATANODE" ]]; then
             tool_template_fill_in_in_place $compose_file "HOST_NAME" $(hostname)
-        else
-            tool_template_fill_in_in_place $compose_file "HOST_NAME" "$HDFS_SERVICE_NAME"
+        elif [[ "$compose_file" == "$DOCKER_COMPOSE_HDFS_NAMENODE" ]]; then
+            tool_template_fill_in_in_place $compose_file "HOST_NAME" $HDFS_NAMENODE
+        elif [[ "$compose_file" == "$DOCKER_COMPOSE_HDFS_2ND_NAMENODE" ]]; then
+            tool_template_fill_in_in_place $compose_file "HOST_NAME" $HDFS_SECONDARY_NAMENODE
         fi
     done
 }
