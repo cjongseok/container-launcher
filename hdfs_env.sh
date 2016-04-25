@@ -49,7 +49,7 @@ function func_configure_docker_compose(){
         
         # Configure properties
         tool_template_fill_in_in_place $compose_file "HDFS_DATA_VOLUME_HOST" $HDFS_DATA_VOLUME_HOST
-        tool_template_fill_in_in_place $compose_file "HDFS_NAME" $HDFS_HOSTNAME
+        tool_template_fill_in_in_place $compose_file "HOST_NAME" $HDFS_HOSTNAME
     done
 }
 
