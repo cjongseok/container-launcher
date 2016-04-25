@@ -15,7 +15,7 @@ PRIMARY_NAMENODE_SRV_NAME=localhost
 SECONDARY_NAMENODE_SRV_NAME="$2"
 
 # Setup env 
-. ${SCRIPT_DIR}/docker_env.sh
+#. ${SCRIPT_DIR}/docker_env.sh
 . ${SCRIPT_DIR}/consul_env.sh
 . ${SCRIPT_DIR}/hdfs_env.sh "$HDFS_SRV_NAME" "$PRIMARY_NAMENODE_SRV_NAME" "$SECONDARY_NAMENODE_SRV_NAME"
 
