@@ -23,6 +23,7 @@ readonly DOCKER_COMPOSE_HDFS_DATANODE=$HADOOP_DOCKER_HOME/hdfs-datanode/docker-c
 readonly HDFS_SERVICE_NAME="$1"
 readonly HDFS_NAMENODE="$2"
 readonly HDFS_SECONDARY_NAMENODE="$3"
+readonly HDFS_HOSTNAME=$(hostname)
 readonly HDFS_DATA_VOLUME_HOST="/opt/hadoop/data"
 
 #  And something
@@ -45,6 +46,7 @@ function func_configure_docker_compose(){
         tool_update_env_var_in_docker_compose "SERVICE_NAME" $HDFS_SERVICE_NAME $compose_file
         tool_update_env_var_in_docker_compose "NAMENODE_SERVICE_NAME" $HDFS_NAMENODE $compose_file
         tool_update_env_var_in_docker_compose "SECONDARY_NAMENODE_SERVICE_NAME" $HDFS_SECONDARY_NAMENODE $compose_file
+        tool_update_env_var_in_docker_compose "HOST_NAME" $HDFS_HOSTNAME $compose_file
         
         # Configure properties
         tool_template_fill_in_in_place $compose_file "HDFS_DATA_VOLUME_HOST" $HDFS_DATA_VOLUME_HOST
