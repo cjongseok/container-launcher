@@ -98,7 +98,7 @@ function func_apply_docker_option(){
     func_write_option_to_docker_conf_file "$option"
 
     # restart docker
-#    sudo service docker restart
+    sudo service docker restart
     sleep 5
 }
 
