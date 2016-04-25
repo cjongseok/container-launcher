@@ -67,9 +67,12 @@ function func_write_option_to_docker_conf_file(){
 
     # TODO: If options already exists, do not apply it and restart docker
 
-    option="\"$option\""
-    sudo sed -i '/^'"$option_var_name"'/d' $docker_conf_file
-    echo "$option_var_name=$option" >> $docker_conf_file
+#    option="\"$option\""
+#    sudo sed -i '/^'"$option_var_name"'/d' $docker_conf_file
+#    echo "$option_var_name=$option" >> $docker_conf_file
+
+
+    sed -i '/^OPTIONS.*$/d' $docker_conf_file
 }
 
 # Set Docker option
@@ -92,7 +95,7 @@ function func_apply_docker_option(){
     fi
 
     # update docker conf file
-#    func_write_option_to_docker_conf_file "$option"
+    func_write_option_to_docker_conf_file "$option"
 
     # restart docker
 #    sudo service docker restart
