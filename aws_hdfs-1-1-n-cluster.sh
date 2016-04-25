@@ -15,6 +15,7 @@ EC2_ENV=$SCRIPT_DIR/ec2_env.sh
 
 LAUNCHER_NN=launch_hdfs-nn_consul-ag.sh
 LAUNCHER_NN2=launch_hdfs-2nd-nn_consul-ag.sh
+LAUNCHER_DN=launch_hdfs-dn_consul-ag.sh
 
 ### Bring Your Own Launcher HERE ##################################################
 LAUNCHER_GIT_REPO=https://github.com/cjongseok/container-launcher.git
@@ -65,6 +66,7 @@ function func_launch(){
     local primary_nn=$(tool_json_get_obj_value "$primary_args" "HDFS_NAMENODE")
     local primary_nn2=$(tool_json_get_obj_value "$primary_args" "HDFS_SECONDARY_NAMENODE")
     local primary_cmd_args="$LAUNCHER_GIT_DEST/$LAUNCHER_NN $primary_srv_name $primary_nn $primary_nn2"
+#    local primary_cmd_args="$LAUNCHER_GIT_DEST/$LAUNCHER_NN $primary_srv_name $primary_nn2"
 
     local secondary_obj=$(tool_json_get_obj_value "$json_obj" "secondary")
     local secondary_ec2_dns=$(tool_json_get_obj_value "$secondary_obj" "ec2_dns")
@@ -73,14 +75,33 @@ function func_launch(){
     local secondary_nn=$(tool_json_get_obj_value "$secondary_args" "HDFS_NAMENODE")
     local secondary_nn2=$(tool_json_get_obj_value "$secondary_args" "HDFS_SECONDARY_NAMENODE")
     local secondary_cmd_args="$LAUNCHER_GIT_DEST/$LAUNCHER_NN2 $secondary_srv_name $secondary_nn $secondary_nn2"
+#    local secondary_cmd_args="$LAUNCHER_GIT_DEST/$LAUNCHER_NN2 $secondary_srv_name $secondary_nn"
 
     # Launch primary namenode
     $EC2_ENV $primary_ec2_dns
-    tool_ansible_git_clone_and_run_in_sudo $EC2_USER_NAME $EC2_PRV_KEY $LAUNCHER_GIT_REPO $LAUNCHER_GIT_DEST $LAUNCHER_GIT_VERSION "$cmd_args" $primary_ec2_dns
+    tool_ansible_git_clone_and_run_in_sudo $EC2_USER_NAME $EC2_PRV_KEY $LAUNCHER_GIT_REPO $LAUNCHER_GIT_DEST $LAUNCHER_GIT_VERSION "$primary_cmd_args" $primary_ec2_dns
 
     # Launch secondary namenode
     $EC2_ENV $secondary_ec2_dns
-    tool_ansible_git_clone_and_run_in_sudo $EC2_USER_NAME $EC2_PRV_KEY $LAUNCHER_GIT_REPO $LAUNCHER_GIT_DEST $LAUNCHER_GIT_VERSION "$cmd_args" $secondary_ec2_dns
+    tool_ansible_git_clone_and_run_in_sudo $EC2_USER_NAME $EC2_PRV_KEY $LAUNCHER_GIT_REPO $LAUNCHER_GIT_DEST $LAUNCHER_GIT_VERSION "$secondary_cmd_args" $secondary_ec2_dns
+
+    # Launch datanodes
+    local datanode_objs=$(tool_json_get_obj_value "$json_obj" "datanodes")
+    local unset index
+    local arr_len=$(tool_json_array_length "$datanode_objs")
+    for ((index=0; index<arr_len; index++)); do
+        local datanode_obj=$(tool_json_array_index_of "$datanode_objs" $index)
+        local dn_ec2_dns=$(tool_json_get_obj_value "$datanode_obj" "ec2_dns")
+        local dn_args=$(tool_json_get_obj_value "$datanode_obj" "args.hdfs")
+        local dn_srv_name=$(tool_json_get_obj_value "$dn_args" "HDFS_SERVICE_NAME")
+        local dn_nn=$(tool_json_get_obj_value "$dn_args" "HDFS_NAMENODE")
+        local dn_nn2=$(tool_json_get_obj_value "$dn_args" "HDFS_SECONDARY_NAMENODE")
+        local dn_cmd_args="$LAUNCHER_GIT_DEST/$LAUNCHER_DN $dn_srv_name $dn_nn $dn_nn2"
+
+        $EC2_ENV $dn_ec2_dns
+        tool_ansible_git_clone_and_run_in_sudo $EC2_USER_NAME $EC2_PRV_KEY $LAUNCHER_GIT_REPO $LAUNCHER_GIT_DEST $LAUNCHER_GIT_VERSION "$dn_cmd_args" $dn_ec2_dns
+
+    done
 }
 
 # validate json file 
