@@ -67,12 +67,13 @@ function func_write_option_to_docker_conf_file(){
 
     # TODO: If options already exists, do not apply it and restart docker
 
-    option="\"$option\""
-    sudo sed -i '/^'"$option_var_name"'/d' $docker_conf_file
-    echo "$option_var_name=$option" >> $docker_conf_file
+    # TODO: for now, disable consul service name based infra. 
+#    option="\"$option\""
+#    sudo sed -i '/^'"$option_var_name"'/d' $docker_conf_file
+#    echo "$option_var_name=$option" >> $docker_conf_file
 
 
-#    sed -i '/^OPTIONS.*$/d' $docker_conf_file
+    sed -i '/^OPTIONS.*$/d' $docker_conf_file
 }
 
 # Set Docker option
