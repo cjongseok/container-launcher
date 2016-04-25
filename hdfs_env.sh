@@ -24,7 +24,7 @@ readonly HDFS_SERVICE_NAME="$1"
 readonly HDFS_NAMENODE="$2"
 readonly HDFS_SECONDARY_NAMENODE="$3"
 #readonly HDFS_HOSTNAME=$(hostname)
-readonly HDFS_HOSTNAME="$HDFS_SERVICE_NAME"
+#readonly HDFS_HOSTNAME="$HDFS_SERVICE_NAME"
 readonly HDFS_DATA_VOLUME_HOST="/opt/hadoop/data"
 
 #  And something
@@ -50,7 +50,13 @@ function func_configure_docker_compose(){
         
         # Configure properties
         tool_template_fill_in_in_place $compose_file "HDFS_DATA_VOLUME_HOST" $HDFS_DATA_VOLUME_HOST
-        tool_template_fill_in_in_place $compose_file "HOST_NAME" $HDFS_HOSTNAME
+#        tool_template_fill_in_in_place $compose_file "HOST_NAME" $HDFS_HOSTNAME
+
+        if [[ "$compose_file" == "$DOCKER_COMPOSE_HDFS_DATANODE" ]]; then
+            tool_template_fill_in_in_place $compose_file "HOST_NAME" $(hostname)
+        else
+            tool_template_fill_in_in_place $compose_file "HOST_NAME" "$HDFS_SERVICE_NAME"
+        fi
     done
 }
 
