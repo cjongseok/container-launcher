@@ -14,7 +14,7 @@ function func_usage(){
 readonly HDFS_SERVICE_NAME=hdfs_dn
 readonly HBASE_SERVICE_NAME="$1"
 readonly HDFS_NAMENODE="$2"
-readonly HDFS_2ND_NAMENODE="$3"
+readonly HDFS_SECONDARY_NAMENODE="$3"
 readonly ZK_QUORUM="$4"
 #readonly REGIONSERVERS="$5"
 #readonly BACKUP_MASTERS="$6"
