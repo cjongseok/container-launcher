@@ -1,0 +1,34 @@
+{
+    "common":{
+        "hdfs":{
+            "HDFS_NAMENODE":"ip-172-31-28-247",
+            "HDFS_SECONDARY_NAMENODE":"ip-172-31-3-33"
+        },
+        "hbase":{
+            "HDFS_NAMENODE":"ip-172-31-28-247",
+            "ZK_QUORUM":"172.31.18.189 172.31.18.190 172.31.14.204"
+        }
+    },
+    "master":{
+        "ec2_dns":"ip-172-31-30-179",
+        "hbase":{
+            "SERVICE_NAME":"hbase_m"
+        }
+    },
+    "backup_masters":[
+        {
+            "ec2_dns":"ip-172-31-8-31",
+            "hbase":{
+                "SERVICE_NAME":"hbase_mb"
+            }
+        }
+    ],
+    "regionservers":[
+        {
+            "ec2_dns":"ip-172-31-23-60",
+            "hbase":{
+                "SERVICE_NAME":"hbase_rs"
+            }
+        }
+    ]
+}
