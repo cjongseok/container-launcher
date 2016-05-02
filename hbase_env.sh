@@ -35,8 +35,8 @@ function func_configure_docker_host_env(){
         tool_update_env_var_in_docker_compose "DOCKER_HOST_IP" "$DOCKER_HOST_IP" $compose_file
     fi
 
-    if [ ! -z $DOCKER_HOST_NAME ]; then
-    fi
+    #if [ ! -z $DOCKER_HOST_NAME ]; then
+    #fi
 }
 
 function func_configure_docker_compose(){
@@ -52,7 +52,6 @@ function func_configure_docker_compose(){
         func_configure_docker_host_env $compose_file
 
         # Configure env vars
-        tool_update_env_var_in_docker_compose "DOCKER_HOST_IP" "$DOCKER_HOST_IP" $compose_file
         tool_update_env_var_in_docker_compose "SERVICE_NAME" "$HBASE_SERVICE_NAME" $compose_file
         tool_update_env_var_in_docker_compose "HDFS_NAMENODE" "$HDFS_NAMENODE" $compose_file
         tool_update_env_var_in_docker_compose "ZK_QUORUM" "$ZK_QUORUM" $compose_file
