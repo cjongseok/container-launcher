@@ -59,7 +59,9 @@ function func_launch(){
     # save logs on local
     # join all the instances
     #for ((index=0; index<json_obj_num; index++)); do
-    for ((index=0; index<3; index++)); do
+    local unset index
+    local arr_len=$(tool_json_array_length "$json_objs")
+    for ((index=0; index<arr_len; index++)); do
         echo "index=$index"
         local json_obj=$(tool_json_array_index_of "$json_objs" $index)
         local ec2_dns=$(tool_json_get_obj_value "$json_obj" "ec2_dns")

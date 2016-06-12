@@ -2,7 +2,7 @@
 
 # $1 json file
 #
-# 1-1-0 means 1 namenode, 1 secondary namenode, and 0 datanode cluster
+# 1-1-0 means 1 namenode, 1 secondary namenode, and n datanode cluster
 #
 
 SCRIPT_NAME=$0

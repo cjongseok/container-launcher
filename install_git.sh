@@ -8,6 +8,7 @@ LINUX_TYPE="$(cat /etc/os-release | grep "ID_LIKE" | sed -e 's/ID_LIKE=\(.*\)/\1
 bin=git
 pkg=git
 
+# Install Git
 unset is_bin_exists
 if [ ! -z $(which $bin) ]; then
     is_bin_exists="$(which $bin)"
@@ -34,3 +35,6 @@ if [ -z $is_bin_exists ]; then
     esac
 fi  
 
+# Set hostname
+#sudo hostname $(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+sudo hostname $(curl -s http://169.254.169.254/latest/meta-data/hostname)

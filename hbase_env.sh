@@ -10,7 +10,8 @@ SCRIPT_DIR=$(dirname $(readlink -e $0))
 . ${SCRIPT_DIR}/tools.sh
 
 readonly HBASE_DOCKER_GIT_URL=https://github.com/cjongseok/hbase.git
-readonly HBASE_DOCKER_GIT_BRANCH=1.2.1
+#readonly HBASE_DOCKER_GIT_BRANCH=1.2.1
+readonly HBASE_DOCKER_GIT_BRANCH=1.0.3
 readonly HBASE_DOCKER_HOME=/opt/hbase
 readonly DOCKER_COMPOSE_HBASE_MASTER=$HBASE_DOCKER_HOME/master/docker-compose.yml
 readonly DOCKER_COMPOSE_HBASE_BACKUP_MASTER=$HBASE_DOCKER_HOME/backup-master/docker-compose.yml
